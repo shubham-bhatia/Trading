@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Form</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<script>
+    // Function to update the value of Field B based on the value of Field A
+    function updateFieldB() {
+        // Get the value of Field A
+        const fieldAValue = parseFloat(document.getElementById('ltp').value);
+        // Calculate the value for Field B (Field A + 0.7%)
+        const fieldBValue = fieldAValue + (fieldAValue * 0.007);
+        const SL = fieldBValue + (fieldBValue * 0.012);
+        const calcPrice = (SL - fieldBValue) * 1.5
+        const TP = fieldBValue - calcPrice;
+        // Set the value of Field B
+        document.getElementById('entry_price').value = fieldBValue.toFixed(2); // Rounded to 2 decimal places
+        document.getElementById('stop_loss').value = SL.toFixed(2);
+        document.getElementById('take_profit').value = TP.toFixed(2);
+    }
+
+    // Add an event listener to Field A to call updateFieldB when its value changes
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const ltp = document.getElementById('ltp');
+        ltp.addEventListener('input', updateFieldB);
+
+        // Add event listeners to product type radio buttons
+        const productTypes = document.getElementsByName('product_type');
+        productTypes.forEach(productType => {
+            productType.addEventListener('change', toggleFields);
+        });
+
+        toggleFields(); // Initialize the fields on page load
+    });
+
+    function toggleFields() {
+        const takeProfitField = document.getElementById('take_profit');
+        const stopLossField = document.getElementById('stop_loss');
+        const productTypeValue = document.querySelector('input[name="product_type"]:checked').value;
+
+        if (productTypeValue === 'INTRADAY') {
+<!--            takeProfitField.disabled = true;-->
+            takeProfitField.style.backgroundColor = "#e9e9e9"; // Grey out the field
+<!--            stopLossField.disabled = true;-->
+            stopLossField.style.backgroundColor = "#e9e9e9"; // Grey out the field
+        } else if (productTypeValue === 'CO') {
+<!--            takeProfitField.disabled = true;-->
+            takeProfitField.style.backgroundColor = "#e9e9e9"; // Grey out the field
+            stopLossField.disabled = false;
+            stopLossField.style.backgroundColor = ""; // Reset to default background color
+        } else {
+            takeProfitField.disabled = false;
+            takeProfitField.style.backgroundColor = ""; // Reset to default background color
+            stopLossField.disabled = false;
+            stopLossField.style.backgroundColor = ""; // Reset to default background color
+        }
+    }
+
+    function confirmSubmission(event) {
+        event.preventDefault();  // Prevent form submission
+        var symbol = document.getElementById('script').value;
+        var userConfirmed = confirm("Are you sure you want to submit this order?");
+        if (userConfirmed) {
+            document.getElementById('orderForm').submit();
+        }
+    }
+</script>
+<body>
+<h1>Order Form</h1>
+<form method="POST" action="{{ url_for('order_form') }}" id="orderForm" onsubmit="confirmSubmission(event)">
+    <label for="script">Script:</label>
+    <input type="text" id="script" name="script" required>
+
+    <label for="ltp">LTP:</label>
+    <input type="number" step="0.01" id="ltp" name="ltp" required>
+
+    <label for="qty">Quantity:</label>
+    <input type="number" id="qty" name="qty" value="1" required>
+
+    <label for="entry_price">Entry Price:</label>
+    <input type="number" step="0.01" id="entry_price" name="entry_price" required>
+
+    <label for="stop_loss">Stop Loss:</label>
+    <input type="number" step="0.01" id="stop_loss" name="stop_loss" value="0" required>
+
+    <label for="take_profit">Take Profit:</label>
+    <input type="number" step="0.01" id="take_profit" name="take_profit" value="0" required>
+
+    <br><br>Select Order Type:<br><br>
+    <label>
+        <input type="radio" name="option" value="1" checked>
+        Single Order
+    </label>
+    <label>
+        <input type="radio" name="option" value="2" disabled>
+        Multiple Orders
+    </label><br><br>
+
+    Select Buy/Sell:<br><br>
+    <label>
+        <input type="radio" name="b_s" value="1" disabled>
+        Buy
+    </label>
+    <label>
+        <input type="radio" name="b_s" value="-1" checked>
+        Sell
+    </label><br><br>
+
+    Select OfflineMode Type:<br><br>
+    <label>
+        <input type="radio" name="mode" value="1">
+        True
+    </label>
+    <label>
+        <input type="radio" name="mode" value="0" checked>
+        False
+    </label><br><br>
+
+    Select Product Type:<br><br>
+    <label>
+        <input type="radio" name="product_type" value="INTRADAY">
+        INTRADAY
+    </label>
+    <label>
+        <input type="radio" name="product_type" value="CO">
+        CO
+    </label>
+    <label>
+        <input type="radio" name="product_type" value="BO" checked>
+        BO
+    </label><br><br>
+
+    Select Order Type:<br><br>
+    <label>
+        <input type="radio" name="order_type" value="1" checked>
+        Limit Order
+    </label>
+    <br><br>
+
+    <input type="submit" class="styled-button" value="Submit Order">
+    <button type="button" class="styled-button" onclick="location.href='{{ url_for('index') }}'">Cancel</button>
+</form>
+</body>
+</html>

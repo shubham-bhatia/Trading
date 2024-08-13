@@ -1,0 +1,3 @@
+scrip,qty,limitPrice,stopLoss,side,productType,type
+nmdc,2,231.60,0,-1,BO,1
+granules,2,693.80,0,-1,BO,1

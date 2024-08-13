@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>Open Positions</title>
+    <script src="https://api-connect-docs.fyers.in/fyers-lib.js"></script>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<script type="text/javascript">
+    function refreshPage() {
+        window.location.reload();
+    }
+    setTimeout(refreshPage, 5000);
+</script>
+<body>
+<h1>Open Positions</h1>
+<table>
+    <tr>
+        <th>Symbol</th>
+        <th>Qty</th>
+        <th>Buy Price</th>
+        <th>Sell Price</th>
+        <th>Price</th>
+        <th>LTP</th>
+        <th>Side</th>
+        <th>Product Type</th>
+        <th>Realized P/L</th>
+        <th>UnRealized P/L</th>
+    </tr>
+    {% for position in positions %}
+    <tr>
+        <td>{{ position.symbol }}</td>
+        <td>{{ position.qty }}</td>
+        <td>{{ position.buyAvg }}</td>
+        <td>{{ position.sellAvg }}</td>
+        <td>{{ position.netAvg }}</td>
+        <td>{{ position.ltp }}</td>
+        <td>{{ position.side }}</td>
+        <td>{{ position.productType }}</td>
+        <td>{{ position.realized_profit | round(2) }}</td>
+        <td>{{ position.unrealized_profit | round(2) }}</td>
+        <td>
+            {% if position.qty != 0 %}
+            <a href="{{ url_for('close_pos', pos_id=position.id) }}"><span style="color: blue; pointer-events: none;">Close Position</span></a>
+            {% else %}
+            <span style="color: red; pointer-events: none;">Position Closed</span>
+            {% endif %}
+        </td>
+
+    </tr>
+    {% endfor %}
+    <tr>
+        <td colspan="8" style="text-align: right;"><strong>Total P/L:</strong></td>
+        <td><strong>{{ total_realized_profit | round(2) }}</strong></td>
+        <td><strong>{{ total_unrealized_profit | round(2) }}</strong></td>
+        <td><strong>{{ Total_pl | round(2) }}</strong></td>
+    </tr>
+</table>
+<br>
+<a href="{{ url_for('index') }}">Back to Home</a>
+<a href="{{ url_for('show_pending_bo_orders') }}">Pending Orders</a>
+</body>
+</html>

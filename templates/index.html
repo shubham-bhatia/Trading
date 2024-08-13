@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flask Web App</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://api-connect-docs.fyers.in/fyers-lib.js"></script>
+</head>
+<body>
+<h1>My FYERS Web Application</h1>
+
+<h2>Upload Your Trade File</h2>
+<form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <button type="submit">Upload</button>
+</form>
+
+<h2>Select Your Action</h2>
+<form action="{{ url_for('perform_action') }}" method="POST">
+    <label>
+        <input type="radio" name="option" value="1">
+        Open New Position
+    </label><br>
+    <label>
+        <input type="radio" name="option" value="2">
+        Show Open Positions
+    </label><br>
+    <label>
+        <input type="radio" name="option" value="3">
+        Cancel All Orders
+    </label><br>
+        <label>
+            <input type="radio" name="option" value="4">
+            Show Order Book
+        </label><br>
+    <label>
+        <input type="radio" name="option" value="5">
+        Show Pending Orders
+    </label><br><br>
+    <div id="passcode-container" style="display: none;">
+        <label for="passcode">Enter Passcode:</label>
+        <input type="password" name="passcode" id="passcode">
+    </div>
+    <br>
+    <button type="submit" class="styled-button">Submit</button>
+    <button type="button" class="styled-button" onclick="location.href='{{ url_for('order_form') }}'">New Order</button>
+</form>
+
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+
+<script>
+    document.querySelectorAll('input[name="option"]').forEach(option => {
+        option.addEventListener('change', function() {
+            var passcodeContainer = document.getElementById('passcode-container');
+            if (this.value == '1' || this.value == '3') {
+                passcodeContainer.style.display = 'block';
+            } else {
+                passcodeContainer.style.display = 'none';
+            }
+        });
+    });
+</script>
+</body>
+</html>
