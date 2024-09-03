@@ -52,8 +52,9 @@
     {% endfor %}
 </table>
 <br>
-<a href="{{ url_for('index') }}">Home</a>
-<a href="{{ url_for('order_form') }}">Create New Order</a>
+<button type="button" class="styled-button" onclick="location.href='{{ url_for('index') }}'">Home</button>
+<button type="button" class="styled-button" onclick="location.href='{{ url_for('order_form') }}'">Create New Order</button>
+<button type="button" class="styled-button" onclick="location.href='{{ url_for('show_saved_order') }}'">Saved Orders</button>
 {% if pending_orders|length > 0 %}
 <!--<a href="{{ url_for('cancel_all_orders') }}">Cancel All Orders</a>-->
 <a href="{{ url_for('show_positions') }}">Show Open Positions</a>

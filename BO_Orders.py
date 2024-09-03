@@ -1,8 +1,10 @@
 import json
-
+import accessTOTP
 from fyers_apiv3 import fyersModel
 
-def getPendingBOOrders(app_id, access_token):
+def getPendingBOOrders():
+    app_id = accessTOTP.APP_ID
+    access_token = accessTOTP.main()
     fyers = fyersModel.FyersModel(client_id=app_id, token=access_token)
     response = fyers.orderbook()
     if 'error' in response:

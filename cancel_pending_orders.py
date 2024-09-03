@@ -1,6 +1,7 @@
 from fyers_api import accessToken
 from fyers_api import fyersModel
 from fyers_apiv3 import fyersModel
+import accessTOTP
 
 
 def initialize_fyers_app():
@@ -16,7 +17,9 @@ def initialize_fyers_app():
     return response
 
 
-def close_all_pending_orders(app_id, access_token):
+def close_all_pending_orders():
+    app_id = accessTOTP.APP_ID
+    access_token = accessTOTP.main()
     fyers = fyersModel.FyersModel(client_id=app_id, token=access_token)
     pending_orders = fyers.orderbook()  # Fetch all orders
     if 'error' in pending_orders:
@@ -33,7 +36,9 @@ def close_all_pending_orders(app_id, access_token):
                 print(f'Failed to cancel order {order_id}:', response['message'])
 
 
-def close_Pending_Order(app_id, access_token, order_id):
+def close_Pending_Order(order_id):
+    app_id = accessTOTP.APP_ID
+    access_token = accessTOTP.main()
     fyers = fyersModel.FyersModel(client_id=app_id, token=access_token)
     response = fyers.cancel_order({'id': order_id})
 

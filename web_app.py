@@ -1,4 +1,6 @@
 import csv
+import json
+import logging
 import os
 from datetime import datetime
 
@@ -6,13 +8,14 @@ from flask import Flask, request, redirect, url_for, render_template, flash
 
 import BO_Orders
 import Orders
-import accessTOTP
 import cancel_pending_orders
 import getPos
+import order_processor
 from cancel_pending_orders import close_all_pending_orders
 
-APP_ID = accessTOTP.APP_ID
-access_token = accessTOTP.main()
+logging.basicConfig(level=logging.INFO)
+# APP_ID = accessTOTP.APP_ID
+# access_token = accessTOTP.main()
 
 # APP_ID = "abc"
 # access_token = "abc"
@@ -23,6 +26,26 @@ app.secret_key = 'your_secret_key'  # Replace with a strong secret key
 UPLOAD_FOLDER = 'uploaded_files'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+
+@app.route('/run_scheduler')
+def run_scheduler():
+    try:
+        # Run the order_processor.py script
+        response = order_processor.process_orders()
+        return render_template('fileProcessed.html', response=response)
+    except Exception as e:
+        return str(e)
+
+@app.route('/process_order/<order_id>')
+def process_order(order_id):
+    try:
+        # Run the order_processor.py script
+        status = order_processor.process_single_order(order_id)
+        delete_file = order_processor.delete_file(order_id)
+        return render_template('fileProcessed.html', response=status)
+    except Exception as e:
+        return str(e)
 
 def read_csv_file(file_path):
     data = []
@@ -59,17 +82,9 @@ def getTradeToOpen(file_path, offlineOrder):
 
             print(f"Processing trade for symbol: {symbol} and Product: {productType} and Stop Loss: {stopLoss}")
             resp1 = Orders.openNewOrder(symbol, qty, entryPrice, (stopLoss - entryPrice), side, productType, type,
-                                        APP_ID,
-                                        access_token, offlineOrder, tp)
+                                        offlineOrder, tp)
 
             flash(resp1)
-            # resp2 = Orders.openNewOrder(symbol, qty, limitPrice1, stopLoss, 1, 'INTRADAY', 1, APP_ID, access_token,
-            #                             offlineOrder)
-            # resp3 = Orders.openNewOrder(symbol, qty, takeProfit, stopLoss, 1, 'INTRADAY', 1, APP_ID, access_token,
-            #                             offlineOrder)
-
-            # flash(resp2)
-            # flash(resp3)
 
 
 def getTradeToOpen2(desktop_path, symbol, qty, entryPrice, offlineOrder, mode, product_type, order_type, b_s, sl_input,
@@ -88,16 +103,12 @@ def getTradeToOpen2(desktop_path, symbol, qty, entryPrice, offlineOrder, mode, p
         tp = make_multiple_of_10(entryPrice - tp_input)
 
     print(f'Entry Price: {entryPrice} Stop Loss: {stopLoss}')
+
     resp1 = Orders.openNewOrder(symbol, qty, entryPrice, (stopLoss - entryPrice), int(b_s), product_type, order_type,
-                                APP_ID, access_token, offlineOrder, tp)
+                                offlineOrder, tp)
 
     flash(resp1)
     return resp1
-    # if mode == 2:
-    #     resp2 = Orders.openNewOrder(symbol, qty, limitPrice1, 0, 1, 'INTRADAY', 1, APP_ID, access_token, offlineOrder)
-    #     resp3 = Orders.openNewOrder(symbol, qty, takeProfit, 0, 1, 'INTRADAY', 1, APP_ID, access_token, offlineOrder)
-    #     flash(resp2)
-    #     flash(resp3)
 
 
 @app.route('/')
@@ -148,7 +159,7 @@ def perform_action():
             return redirect(url_for('show_positions'))
         elif selected_value == 3:
             flash('Canceling all orders...')
-            close_all_pending_orders(APP_ID, access_token)  # Call the new function
+            close_all_pending_orders()  # Call the new function
         elif selected_value == 4:
             # flash('Showing order book...')
             return redirect(url_for('show_orderbook'))
@@ -160,7 +171,7 @@ def perform_action():
 
 @app.route('/positions')
 def show_positions():
-    positions = getPos.getOpenPositions(APP_ID, access_token)
+    positions = getPos.getOpenPositions()
     total_realized_profit = sum(position['realized_profit'] for position in positions)
     total_unrealized_profit = sum(position['unrealized_profit'] for position in positions)
     Total_pl = total_realized_profit + total_unrealized_profit
@@ -168,35 +179,59 @@ def show_positions():
                            total_unrealized_profit=total_unrealized_profit, Total_pl=Total_pl)
 
 
+@app.route('/show_saved_order')
+def show_saved_order():
+    # List all JSON files in the orders directory
+    order_files = [f for f in os.listdir(UPLOAD_FOLDER) if f.endswith('.json')]
+    orders = []
+
+    # Load each order file and append it to the orders list
+    for order_file in order_files:
+        with open(os.path.join(UPLOAD_FOLDER, order_file), 'r') as file:
+            order_data = json.load(file)
+            orders.append(order_data)
+
+    # Render the HTML template with the orders data
+    return render_template('show_saved_order.html', orders=orders)
+
+
 @app.route('/orderbook')
 def show_orderbook():
-    orderbook = Orders.getOrderbook(APP_ID, access_token)
+    orderbook = Orders.getOrderbook()
     return render_template('orderbook.html', orderbook=orderbook)
 
 
 @app.route('/pending_bo_orders')
 def show_pending_bo_orders():
-    pending_orders = BO_Orders.getPendingBOOrders(APP_ID, access_token)
-    # print(quotes.get_quotes(APP_ID, access_token, "NSE:MOTHERSON-EQ"))
+    pending_orders = BO_Orders.getPendingBOOrders()
     return render_template('pending_bo_orders.html', pending_orders=pending_orders)
 
 
 @app.route('/cancel_order/<order_id>')
 def cancel_order(order_id):
     flash('Order Cancelled: ', order_id)
-    cancel_order = cancel_pending_orders.close_Pending_Order(APP_ID, access_token, order_id)
+    cancel_order = cancel_pending_orders.close_Pending_Order(order_id)
     return redirect(url_for('show_pending_bo_orders'))
+
+
+@app.route('/delete_order/<order_id>')
+def delete_order(order_id):
+    flash('Order Deleted: ', order_id)
+    filepath = os.path.join(UPLOAD_FOLDER, order_id)
+    os.remove(filepath)
+    logging.info(f"Order executed and file {order_id} deleted.")
+    return redirect(url_for('show_saved_order'))
 
 
 @app.route('/cancel__all_orders')
 def cancel_all_orders():
-    close_all_pending_orders(APP_ID, access_token)
+    close_all_pending_orders()
     return redirect(url_for('show_pending_bo_orders'))
 
 
 @app.route('/close_pos/<pos_id>')
 def close_pos(pos_id):
-    closePos = getPos.closeOpenPositions(APP_ID, access_token, pos_id)
+    closePos = getPos.closeOpenPositions(pos_id)
     flash('Close Position: ', pos_id)
     return redirect(url_for('show_positions'))
 
@@ -220,12 +255,11 @@ def order_form():
         b_s = request.form.get('b_s')
         sl = request.form.get('stop_loss')
         tp = request.form.get('take_profit')
+        order_datetime_str = request.form.get('order_datetime')
+        order_datetime = datetime.strptime(order_datetime_str, "%Y-%m-%dT%H:%M").time()
 
         # Get the current time
         current_time = datetime.now().time()
-
-        # Define the target time (3:15 PM)
-        target_time = datetime.strptime("15:15", "%H:%M").time()
 
         if mode == 1:
             mode = True
@@ -233,12 +267,41 @@ def order_form():
             mode = False
 
         # Compare the current time with the target time
-        # if current_time > target_time:
-        #     mode = False
+        if order_datetime <= current_time:
+            response = getTradeToOpen2(desktop_path, symbol, qty, float(entry_price), mode, selected_option,
+                                       product_type,
+                                       order_type, b_s, float(sl), float(tp))
+            return render_template('order_success.html', script=symbol, qty=qty, limit_price=entry_price,
+                                   response=response)
+        else:
 
-        response = getTradeToOpen2(desktop_path, symbol, qty, float(entry_price), mode, selected_option, product_type,
-                                   order_type, b_s, float(sl), float(tp))
-        return render_template('order_success.html', script=symbol, qty=qty, limit_price=entry_price, response=response)
+            # Generate a unique filename for the JSON file (e.g., based on order_datetime)
+            filename = f"order_{datetime.now().strftime('%Y%m%d%H%M%S')}.json"
+            json_file_path = os.path.join(UPLOAD_FOLDER, filename)
+
+            # Save the order details in a JSON file in the uploaded_files folder
+            order_details = {
+                "symbol": symbol,
+                "qty": qty,
+                "entry_price": entry_price,
+                "order_datetime": order_datetime_str,
+                "mode": mode,
+                "selected_option": selected_option,
+                "product_type": product_type,
+                "order_type": order_type,
+                "b_s": b_s,
+                "sl": sl,
+                "tp": tp,
+                "filename": filename
+            }
+
+            # Save the order details to the JSON file
+            with open(json_file_path, "w") as json_file:
+                json.dump(order_details, json_file, indent=4)
+                response = f"{filename} Saved"
+
+            return render_template('order_saved.html', script=symbol, qty=qty, limit_price=entry_price,
+                                   response=response)
 
     return render_template('order_form.html')
 

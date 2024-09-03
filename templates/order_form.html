@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <title>Order Form</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" type="text/css">
 </head>
 <script>
     // Function to update the value of Field B based on the value of Field A
@@ -70,78 +70,84 @@
 </script>
 <body>
 <h1>Order Form</h1>
-<form method="POST" action="{{ url_for('order_form') }}" id="orderForm" onsubmit="confirmSubmission(event)">
+<!--<form action="{{ url_for('order_form') }}" id="orderForm" method="POST" onsubmit="confirmSubmission(event)">-->
+<form action="{{ url_for('order_form') }}" id="orderForm" method="POST" >
     <label for="script">Script:</label>
-    <input type="text" id="script" name="script" required>
+    <input id="script" name="script" required type="text">
 
     <label for="ltp">LTP:</label>
-    <input type="number" step="0.01" id="ltp" name="ltp" required>
+    <input id="ltp" name="ltp" required step="0.01" type="number">
 
     <label for="qty">Quantity:</label>
-    <input type="number" id="qty" name="qty" value="1" required>
+    <input id="qty" name="qty" required type="number" value="1">
 
     <label for="entry_price">Entry Price:</label>
-    <input type="number" step="0.01" id="entry_price" name="entry_price" required>
+    <input id="entry_price" name="entry_price" required step="0.01" type="number">
 
     <label for="stop_loss">Stop Loss:</label>
-    <input type="number" step="0.01" id="stop_loss" name="stop_loss" value="0" required>
+    <input id="stop_loss" name="stop_loss" required step="0.01" type="number" value="0">
 
     <label for="take_profit">Take Profit:</label>
-    <input type="number" step="0.01" id="take_profit" name="take_profit" value="0" required>
+    <input id="take_profit" name="take_profit" required step="0.01" type="number" value="0">
 
     <br><br>Select Order Type:<br><br>
     <label>
-        <input type="radio" name="option" value="1" checked>
+        <input checked name="option" type="radio" value="1">
         Single Order
     </label>
     <label>
-        <input type="radio" name="option" value="2" disabled>
+        <input disabled name="option" type="radio" value="2">
         Multiple Orders
     </label><br><br>
 
     Select Buy/Sell:<br><br>
     <label>
-        <input type="radio" name="b_s" value="1" disabled>
+        <input disabled name="b_s" type="radio" value="1">
         Buy
     </label>
     <label>
-        <input type="radio" name="b_s" value="-1" checked>
+        <input checked name="b_s" type="radio" value="-1">
         Sell
     </label><br><br>
 
     Select OfflineMode Type:<br><br>
     <label>
-        <input type="radio" name="mode" value="1">
+        <input name="mode" type="radio" value="1">
         True
     </label>
     <label>
-        <input type="radio" name="mode" value="0" checked>
+        <input checked name="mode" type="radio" value="0">
         False
     </label><br><br>
 
     Select Product Type:<br><br>
     <label>
-        <input type="radio" name="product_type" value="INTRADAY">
+        <input name="product_type" type="radio" value="INTRADAY">
         INTRADAY
     </label>
     <label>
-        <input type="radio" name="product_type" value="CO">
+        <input name="product_type" type="radio" value="CO">
         CO
     </label>
     <label>
-        <input type="radio" name="product_type" value="BO" checked>
+        <input checked name="product_type" type="radio" value="BO">
         BO
     </label><br><br>
 
     Select Order Type:<br><br>
     <label>
-        <input type="radio" name="order_type" value="1" checked>
+        <input checked name="order_type" type="radio" value="1">
         Limit Order
     </label>
     <br><br>
 
-    <input type="submit" class="styled-button" value="Submit Order">
-    <button type="button" class="styled-button" onclick="location.href='{{ url_for('index') }}'">Cancel</button>
+    <label for="order_datetime">Select Order Date and Time:</label>
+    <input id="order_datetime" name="order_datetime"  type="datetime-local">
+
+
+    <input class="styled-button" type="submit" value="Submit Order">
+    <button class="styled-button" onclick="location.href='{{ url_for('index') }}'" type="button">Cancel</button>
+
 </form>
 </body>
 </html>

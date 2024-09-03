@@ -1,5 +1,5 @@
 import csv
-# import accessTOTP
+import accessTOTP
 import json
 import os
 import tkinter as tk
@@ -8,10 +8,11 @@ from tkinter import messagebox
 from fyers_apiv3 import fyersModel
 
 
-def getOrderbook(app_id, access_token):
+def getOrderbook():
+    app_id = accessTOTP.APP_ID
+    access_token = accessTOTP.main()
     fyers = fyersModel.FyersModel(client_id=app_id, token=access_token)
     response = fyers.orderbook()
-    print(response)
     if 'error' in response:
         print('Error fetching order book:', response['error'])
         return []
@@ -39,7 +40,7 @@ def getTradeToOpen():
         print(type(csv_data[i]))
 
 
-def openNewOrder(symbol, qty, limitPrice, stopLoss, side, productType, order_type, APP_ID, access_token, offlineOrder,
+def openNewOrder(symbol, qty, limitPrice, stopLoss, side, productType, order_type, offlineOrder,
                  takeProfit):
     symbol = "NSE:" + symbol.upper() + "-EQ"
 
@@ -66,9 +67,10 @@ def openNewOrder(symbol, qty, limitPrice, stopLoss, side, productType, order_typ
         "tag": "Python",
         "offlineOrder": offlineOrder
     }
+    APP_ID = accessTOTP.APP_ID
+    access_token = accessTOTP.main()
     fyers = fyersModel.FyersModel(client_id=APP_ID, token=access_token, is_async=False, log_path="")
     response = fyers.place_order(data=data)
-    # print(response)
 
     if response['message'] == "Successfully placed order":
         return "Order Status", "Order placed successfully!"
@@ -85,6 +87,8 @@ def checkSide(side):
 
 
 def getParentOrderDetails(APP_ID, access_token, parentId):
+    APP_ID = accessTOTP.APP_ID
+    access_token = accessTOTP.main()
     fyers = fyersModel.FyersModel(client_id=APP_ID, token=access_token, is_async=False, log_path="")
     response = fyers.orderbook()
     parsed_data = json.loads(json.dumps(response))

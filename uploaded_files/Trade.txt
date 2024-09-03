@@ -1,4 +1,0 @@
-scrip,qty,limitPrice,stopLoss,side,productType,type
-hindcopper,5,315.95,0,-1,BO,1
-balramchin,2,512.65,0,-1,BO,1
-auropharma,2,1506.90,0,-1,BO,1

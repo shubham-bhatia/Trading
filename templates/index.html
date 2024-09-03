@@ -8,9 +8,9 @@
     <script src="https://api-connect-docs.fyers.in/fyers-lib.js"></script>
 </head>
 <body>
-<h1>My FYERS Web Application</h1>
+<h1>My Web Application</h1>
 
-<h2>Upload Your Trade File</h2>
+<h2>Upload Your File</h2>
 <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
     <input type="file" name="file">
     <button type="submit">Upload</button>
@@ -44,7 +44,9 @@
     </div>
     <br>
     <button type="submit" class="styled-button">Submit</button>
-    <button type="button" class="styled-button" onclick="location.href='{{ url_for('order_form') }}'">New Order</button>
+    <button type="button" class="styled-button" onclick="location.href='{{ url_for('order_form') }}'">New</button>
+    <button type="button" class="styled-button" onclick="location.href='{{ url_for('show_saved_order') }}'">Saved Orders</button>
+     <a href="{{ url_for('run_scheduler') }}" target="_self">Process Saved Files</a>
 </form>
 
 {% with messages = get_flashed_messages() %}

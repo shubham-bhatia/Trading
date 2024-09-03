@@ -1,5 +1,5 @@
 import json
-
+import accessTOTP
 from fyers_apiv3 import fyersModel
 
 
@@ -35,7 +35,9 @@ from fyers_apiv3 import fyersModel
 #     print('Position Open Count: ', parsed_data['overall']['count_open'], '|| Position Realized PL: ',
 #           round(parsed_data['overall']['pl_unrealized'],3))
 
-def getOpenPositions(app_id, access_token):
+def getOpenPositions():
+    app_id = accessTOTP.APP_ID
+    access_token = accessTOTP.main()
     fyers = fyersModel.FyersModel(client_id=app_id, token=access_token)
     response = fyers.positions()
     # print(response)
