@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Success</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+{% if 'error' in response['s'] %}
+<h1>Error Saving File</h1>
+<p>Script: {{ script }}</p>
+<p>Quantity: {{ qty }}</p>
+<p>Entry Price: {{ limit_price }}</p>
+<p>-----------------------------------------</p>
+<p>Error: {{ response.message }}</p>
+<p>There was an error submitting your order. Please try again.</p>
+{% else %}
+<h1>File Created Successfully</h1>
+<p>Script: {{ script }}</p>
+<p>Quantity: {{ qty }}</p>
+<p>Entry Price: {{ limit_price }}</p>
+<p>Response: {{ response }}</p>
+<p>Thank you for your order!</p>
+{% endif %}
+
+<button type="button" class="styled-button" onclick="location.href='{{ url_for('order_form') }}'">New Order</button>
+<button type="button" class="styled-button" onclick="location.href='{{ url_for('index') }}'">Home</button>
+<button type="button" class="styled-button" onclick="location.href='{{ url_for('show_pending_bo_orders') }}'">Pending
+    Orders
+</button>
+</body>
+</html>

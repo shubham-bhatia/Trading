@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Orders</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Saved Orders</h1>
+<table>
+    <tr>
+        <th>File</th>
+        <th>Symbol</th>
+        <th>Qty</th>
+        <th>Entry Price</th>
+        <th>Side</th>
+        <th>Status</th>
+        <th>Product Type</th>
+        <th>Order Type</th>
+        <th>Order Date</th>
+    </tr>
+    {% for order in orders %}
+    <tr>
+        <td>{{ order.filename }}</td>
+        <td>{{ order.symbol }}</td>
+        <td>{{ order.qty }}</td>
+        <td>{{ order.entry_price }}</td>
+        <td>{% if order.b_s == -1 %}Sell{% else %}Buy{% endif %}</td>
+        <td>To Be Processed</td>
+        <td>{{ order.product_type }}</td>
+        <td>{% if order.order_type == 1 %}Limit{% elif order.order_type == 2 %}Market{% elif order.order_type == 3 %}SL-Market{% else %}Stoplimit{% endif %}</td>
+        <td>{{ order.order_datetime }}</td>
+        <td><a href="{{ url_for('delete_order', order_id=order.filename) }}">Delete Order</a></td>
+        <td><a href="{{ url_for('process_order', order_id=order.filename) }}">Process Order</a></td>
+    </tr>
+    {% endfor %}
+</table>
+<br>
+<button type="button" class="styled-button" onclick="location.href='{{ url_for('index') }}'">Home</button>
+<button type="button" class="styled-button" onclick="location.href='{{ url_for('order_form') }}'">Create New Order</button>
+<button type="button" class="styled-button" onclick="location.href='{{ url_for('run_scheduler') }}'">Process Saved Files</button>
+<button type="button" class="styled-button" onclick="location.href='{{ url_for('show_pending_bo_orders') }}'">Pending Orders</button>
+{% if pending_orders|length > 0 %}
+<!--<a href="{{ url_for('cancel_all_orders') }}">Cancel All Orders</a>-->
+<a href="{{ url_for('show_positions') }}">Show Open Positions</a>
+{% endif %}
+</body>
+</html>
