@@ -42,7 +42,8 @@ def process_order(order_id):
     try:
         # Run the order_processor.py script
         status = order_processor.process_single_order(order_id)
-        delete_file = order_processor.delete_file(order_id)
+        # if status != "error":
+        #     order_processor.delete_file(order_id)
         return render_template('fileProcessed.html', response=status)
     except Exception as e:
         return str(e)
@@ -94,7 +95,7 @@ def getTradeToOpen2(desktop_path, symbol, qty, entryPrice, offlineOrder, mode, p
     if sl_input == 0:
         stopLoss = make_multiple_of_10(entryPrice + (entryPrice * 0.012))
     else:
-        stopLoss = sl_input
+        stopLoss = make_multiple_of_10(sl_input)
     calcPrice = (stopLoss - entryPrice) * 1.5
     takeProfit = make_multiple_of_10(entryPrice - calcPrice)
     if tp_input == 0:
@@ -102,7 +103,7 @@ def getTradeToOpen2(desktop_path, symbol, qty, entryPrice, offlineOrder, mode, p
     else:
         tp = make_multiple_of_10(entryPrice - tp_input)
 
-    print(f'Entry Price: {entryPrice} Stop Loss: {stopLoss}')
+    logging.info(f'Entry Price: {entryPrice} Stop Loss: {stopLoss} Take Profit: {tp}')
 
     resp1 = Orders.openNewOrder(symbol, qty, entryPrice, (stopLoss - entryPrice), int(b_s), product_type, order_type,
                                 offlineOrder, tp)
@@ -257,17 +258,21 @@ def order_form():
         tp = request.form.get('take_profit')
         order_datetime_str = request.form.get('order_datetime')
         order_datetime = datetime.strptime(order_datetime_str, "%Y-%m-%dT%H:%M").time()
+        order_date = datetime.strptime(order_datetime_str, "%Y-%m-%dT%H:%M")
 
         # Get the current time
         current_time = datetime.now().time()
+        current_date = datetime.now()
 
         if mode == 1:
             mode = True
         else:
             mode = False
 
+        # logging.info(f"Mode {mode}")
+        # logging.info(f"Shubham-{order_date}-{order_datetime} {current_date}-{current_time}")
         # Compare the current time with the target time
-        if order_datetime <= current_time:
+        if (order_datetime <= current_time and order_date <= current_date):
             response = getTradeToOpen2(desktop_path, symbol, qty, float(entry_price), mode, selected_option,
                                        product_type,
                                        order_type, b_s, float(sl), float(tp))

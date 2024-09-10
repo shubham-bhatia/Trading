@@ -3,7 +3,7 @@ import logging
 import os
 import time
 from datetime import datetime
-
+import pytz
 import web_app
 
 # Setup logging
@@ -14,19 +14,29 @@ uploaded_files_directory = 'uploaded_files'
 
 
 def process_single_order(filename):
-    order_status = "No File Exists!"
+    order_status = "File unavailable"
     filepath = os.path.join(uploaded_files_directory, filename)
     with open(filepath, 'r') as json_file:
         order_data = json.load(json_file)
 
         order_time_str = order_data.get('order_datetime')
         order_time = datetime.strptime(order_time_str, '%Y-%m-%dT%H:%M').time()
+        order_date = datetime.strptime(order_time_str, '%Y-%m-%dT%H:%M')
 
         # Get the current time
-        current_time = datetime.now().time()
+        # current_time = datetime.now().time()
+        current_date = datetime.now()
+        ist_timezone = pytz.timezone('Asia/Kolkata')
+        ist_date = current_date.astimezone(ist_timezone)
+        formatted_ist_date = ist_date.strftime('%Y-%m-%d %H:%M:%S')
+        comparable_date = datetime.strptime(formatted_ist_date, '%Y-%m-%d %H:%M:%S')
 
+        # local_now = datetime.now(ist_timezone)
+        # current_date = datetime.strftime(ist_date, '%Y-%m-%dT%H:%M')
+
+        # logging.info(f"Shubham-{formatted_ist_date}//{current_date}//{order_date}")
         # Check if the order time is less than or equal to the current time
-        if order_time <= current_time:
+        if order_date <= comparable_date:
             # Double-check if the file still exists before executing the order
             if os.path.exists(filepath):
                 response = web_app.getTradeToOpen2(
@@ -43,18 +53,25 @@ def process_single_order(filename):
                     float(order_data["tp"])
                 )
 
-                # Log the successful execution
-                logging.info(f"Order executed: {response}")
-                order_status = "Order executed"
+                if response['s'] == 'error':
+                    logging.info(f"Order failed: {response}")
+                    order_status = response['s']
+
+                else:
+                    # Log the successful execution
+                    logging.info(f"Order executed: {response}")
+                    order_status = response #"Order executed"
 
                 # os.remove(filepath)
                 # logging.info(f"Order executed and file {filename} deleted.")
+        else:
+            order_status = "Not the right time to execute the order"
     return order_status
 
 def delete_file(filename):
     filepath = os.path.join(uploaded_files_directory, filename)
     os.remove(filepath)
-    logging.info(f"Order executed and file {filename} deleted.")
+    logging.info(f"File {filename} deleted.")
 
 def process_orders():
     # Check if the directory exists
@@ -71,7 +88,7 @@ def process_orders():
         filepath = os.path.join(uploaded_files_directory, filename)
 
         # Ensure we only process JSON files
-        if not filename.endswith('.json') and filename != 'Trade.txt':
+        if not filename.endswith('.json'):# and filename != 'Trade.txt':
             continue
 
         try:
@@ -85,15 +102,21 @@ def process_orders():
         order_time_str = order_data.get('order_datetime')
         try:
             order_time = datetime.strptime(order_time_str, '%Y-%m-%dT%H:%M').time()
+            order_date = datetime.strptime(order_time_str, '%Y-%m-%dT%H:%M')
         except ValueError as e:
             logging.error(f"Time format error in file {filename}: {e}")
             continue
 
         # Get the current time
-        current_time = datetime.now().time()
+        # current_time = datetime.now().time()
+        current_date = datetime.now()
+        ist_timezone = pytz.timezone('Asia/Kolkata')
+        ist_date = current_date.astimezone(ist_timezone)
+        formatted_ist_date = ist_date.strftime('%Y-%m-%d %H:%M:%S')
+        comparable_date = datetime.strptime(formatted_ist_date, '%Y-%m-%d %H:%M:%S')
 
         # Check if the order time is less than or equal to the current time
-        if order_time <= current_time:
+        if order_date <= comparable_date:
             # Double-check if the file still exists before executing the order
             if os.path.exists(filepath):
                 try:
@@ -111,16 +134,18 @@ def process_orders():
                         float(order_data["tp"])
                     )
 
-                    # Log the successful execution
-                    logging.info(f"Order executed: {response}")
-                    status = "Order executed"
+                    if response['s'] == 'error':
+                        logging.info(f"Order failed: {response}")
+                        status = response['s']
 
-                    # After executing, delete the file
-                    os.remove(filepath)
-                    logging.info(f"Order executed and file {filename} deleted.")
+                    else:
+                        # Log the successful execution
+                        logging.info(f"Order executed: {response}")
+                        status = "Order executed"
+
                 except Exception as e:
                     logging.error(f"Failed to execute order: {e}")
-                    status = f"Failed to execute order: {e}"
+                    status = "Failed to execute order"
             else:
                 logging.warning(f"File {filename} does not exist anymore. Skipping execution.")
                 status = f"File {filename} does not exist anymore. Skipping execution."

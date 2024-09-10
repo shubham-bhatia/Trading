@@ -31,7 +31,8 @@
         <th>Qty</th>
         <th>Entry Price</th>
         <th>Side</th>
-        <th>Status</th>
+        <th>SL</th>
+        <th>TP</th>
         <th>Product Type</th>
         <th>Order Type</th>
         <th>Order Date</th>
@@ -42,8 +43,10 @@
         <td>{{ order.symbol }}</td>
         <td>{{ order.qty }}</td>
         <td>{{ order.entry_price }}</td>
-        <td>{% if order.b_s == -1 %}Sell{% else %}Buy{% endif %}</td>
-        <td>To Be Processed</td>
+        <td>{% if order.b_s == "-1" %}Sell{% else %}Buy{% endif %}</td>
+        <!--<td>{{ order.b_s }}</td>-->
+        <td>{{ order.sl }}</td>
+        <td>{{ order.tp }}</td>
         <td>{{ order.product_type }}</td>
         <td>{% if order.order_type == 1 %}Limit{% elif order.order_type == 2 %}Market{% elif order.order_type == 3 %}SL-Market{% else %}Stoplimit{% endif %}</td>
         <td>{{ order.order_datetime }}</td>

@@ -7,6 +7,30 @@
     <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" type="text/css">
 </head>
 <script>
+
+     window.onload = function() {
+            // Get the current date and time
+            var now = new Date();
+
+            // Set the time to 09:15 AM
+            now.setHours(9);
+            now.setMinutes(15);
+            now.setSeconds(0);
+            now.setMilliseconds(0);
+
+            // Format the date and time to match the 'datetime-local' input format
+            var year = now.getFullYear();
+            var month = ('0' + (now.getMonth() + 1)).slice(-2);
+            var day = ('0' + now.getDate()).slice(-2);
+            var hours = ('0' + now.getHours()).slice(-2);
+            var minutes = ('0' + now.getMinutes()).slice(-2);
+
+            // Combine into the required format
+            var formattedDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+
+            // Set the value of the input field
+            document.getElementById('order_datetime').value = formattedDateTime;
+        };
     // Function to update the value of Field B based on the value of Field A
     function updateFieldB() {
         // Get the value of Field A
