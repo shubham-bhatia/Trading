@@ -15,6 +15,7 @@ uploaded_files_directory = 'uploaded_files'
 
 def process_single_order(filename):
     order_status = "File unavailable"
+    order_response = "Default"
     filepath = os.path.join(uploaded_files_directory, filename)
     with open(filepath, 'r') as json_file:
         order_data = json.load(json_file)
@@ -56,6 +57,7 @@ def process_single_order(filename):
                 if response['s'] == 'error':
                     logging.info(f"Order failed: {response}")
                     order_status = "order_failed"
+                    order_response = response
 
                 else:
                     # Log the successful execution
@@ -66,7 +68,7 @@ def process_single_order(filename):
                 # logging.info(f"Order executed and file {filename} deleted.")
         else:
             order_status = "Not the right time to execute the order"
-    return order_status
+    return order_status, order_response
 
 def delete_file(filename):
     filepath = os.path.join(uploaded_files_directory, filename)

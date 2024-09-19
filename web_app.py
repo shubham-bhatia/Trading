@@ -42,11 +42,11 @@ def process_order(order_id):
     try:
         # Run the order_processor.py script
         status = order_processor.process_single_order(order_id)
-        if status != "order_failed":
+        if status[0] != "order_failed":
             order_processor.delete_file(order_id)
-        elif status == 'order_failed':
+        elif status[0] == 'order_failed':
                 status = "Order has been failed. Check the logs!"
-        return render_template('fileProcessed.html', response=status)
+        return render_template('fileProcessed.html', response=status[1])
     except Exception as e:
         return str(e)
 
