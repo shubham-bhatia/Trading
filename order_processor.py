@@ -55,12 +55,12 @@ def process_single_order(filename):
 
                 if response['s'] == 'error':
                     logging.info(f"Order failed: {response}")
-                    order_status = response['s']
+                    order_status = "order_failed"
 
                 else:
                     # Log the successful execution
                     logging.info(f"Order executed: {response}")
-                    order_status = response #"Order executed"
+                    order_status = response
 
                 # os.remove(filepath)
                 # logging.info(f"Order executed and file {filename} deleted.")
@@ -136,12 +136,12 @@ def process_orders():
 
                     if response['s'] == 'error':
                         logging.info(f"Order failed: {response}")
-                        status = response['s']
+                        status = "order_failed"
 
                     else:
                         # Log the successful execution
                         logging.info(f"Order executed: {response}")
-                        status = "Order executed"
+                        status = response
 
                 except Exception as e:
                     logging.error(f"Failed to execute order: {e}")
