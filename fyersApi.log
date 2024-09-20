@@ -1,1 +1,2 @@
 {"level":"ERROR","location":"[post_call:86] fyersModel","message":{"API":"/orders/sync","Error":{"code":-50,"message":"StopLoss not a multiple of tick size 0.0500","s":"error"}},"timestamp":"2024-09-03 10:59:42,719+0530","service":"FyersAPI"}
+{"level":"ERROR","location":"[post_call:86] fyersModel","message":{"API":"/orders/sync","Error":{"code":-50,"message":"The input symbol is invalid.","s":"error"}},"timestamp":"2024-09-19 10:20:12,104+0530","service":"FyersAPI"}

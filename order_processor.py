@@ -54,20 +54,23 @@ def process_single_order(filename):
                     float(order_data["tp"])
                 )
 
-                if response['s'] == 'error':
+                logging.info(f"Shubham: {response}")
+                logging.info(f"response_s: {response[1]}")
+
+                if response[1] == 'error': #response['s']
                     logging.info(f"Order failed: {response}")
                     order_status = "order_failed"
                     order_response = response
 
-                else:
+                elif response[1] == 'Order placed successfully!':
                     # Log the successful execution
                     logging.info(f"Order executed: {response}")
                     order_status = response
+                    order_response = response[1]
 
-                # os.remove(filepath)
-                # logging.info(f"Order executed and file {filename} deleted.")
         else:
             order_status = "Not the right time to execute the order"
+            order_response = "Not the right time to execute the order"
     return order_status, order_response
 
 def delete_file(filename):

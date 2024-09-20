@@ -27,11 +27,9 @@ UPLOAD_FOLDER = 'uploaded_files'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-
 @app.route('/run_scheduler')
 def run_scheduler():
     try:
-        # Run the order_processor.py script
         response = order_processor.process_orders()
         return render_template('fileProcessed.html', response=response)
     except Exception as e:
@@ -40,13 +38,13 @@ def run_scheduler():
 @app.route('/process_order/<order_id>')
 def process_order(order_id):
     try:
-        # Run the order_processor.py script
         status = order_processor.process_single_order(order_id)
-        if status[0] != "order_failed":
+        if status[1] == "Order placed successfully!":
             order_processor.delete_file(order_id)
+            status = status[1]
         elif status[0] == 'order_failed':
                 status = "Order has been failed. Check the logs!"
-        return render_template('fileProcessed.html', response=status[1])
+        return render_template('fileProcessed.html', response=status)
     except Exception as e:
         return str(e)
 
@@ -243,13 +241,13 @@ def close_pos(pos_id):
 def new_order():
     return redirect(url_for('order_form'))
 
-
 @app.route('/order_form', methods=['GET', 'POST'])
 def order_form():
     desktop_path = os.path.join('C:', os.sep, 'Users', 'shubhbhatia', 'Desktop', 'Trade.txt')
     if request.method == 'POST':
         symbol = request.form['script']
         qty = request.form['qty']
+        ltp = request.form['ltp']
         entry_price = request.form['entry_price']
         selected_option = request.form.get('option')
         mode = request.form.get('mode')
@@ -274,11 +272,11 @@ def order_form():
         # logging.info(f"Mode {mode}")
         # logging.info(f"Shubham-{order_date}-{order_datetime} {current_date}-{current_time}")
         # Compare the current time with the target time
-        if (order_datetime <= current_time and order_date <= current_date):
+        if order_datetime <= current_time and order_date <= current_date:
             response = getTradeToOpen2(desktop_path, symbol, qty, float(entry_price), mode, selected_option,
                                        product_type,
                                        order_type, b_s, float(sl), float(tp))
-            return render_template('order_success.html', script=symbol, qty=qty, limit_price=entry_price,
+            return render_template('order_success.html', script=symbol, ltp=ltp, qty=qty, limit_price=entry_price,
                                    response=response)
         else:
 
@@ -290,6 +288,7 @@ def order_form():
             order_details = {
                 "symbol": symbol,
                 "qty": qty,
+                "ltp": ltp,
                 "entry_price": entry_price,
                 "order_datetime": order_datetime_str,
                 "mode": mode,
@@ -307,7 +306,7 @@ def order_form():
                 json.dump(order_details, json_file, indent=4)
                 response = f"{filename} Saved"
 
-            return render_template('order_saved.html', script=symbol, qty=qty, limit_price=entry_price,
+            return render_template('order_saved.html', script=symbol, ltp=ltp, qty=qty, limit_price=entry_price,
                                    response=response)
 
     return render_template('order_form.html')

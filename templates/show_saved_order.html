@@ -29,6 +29,7 @@
         <th>File</th>
         <th>Symbol</th>
         <th>Qty</th>
+        <th>LTP</th>
         <th>Entry Price</th>
         <th>Side</th>
         <th>SL</th>
@@ -42,6 +43,7 @@
         <td>{{ order.filename }}</td>
         <td>{{ order.symbol }}</td>
         <td>{{ order.qty }}</td>
+        <td>{{ order.ltp }}</td>
         <td>{{ order.entry_price }}</td>
         <td>{% if order.b_s == "-1" %}Sell{% else %}Buy{% endif %}</td>
         <!--<td>{{ order.b_s }}</td>-->
