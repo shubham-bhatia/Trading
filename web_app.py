@@ -23,7 +23,7 @@ logging.basicConfig(level=logging.INFO)
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with a strong secret key
 
-UPLOAD_FOLDER = 'uploaded_files'
+UPLOAD_FOLDER = 'shubhbhatia/Trading/uploaded_files'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
