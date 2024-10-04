@@ -40,7 +40,7 @@ def process_order(order_id):
     try:
         status = order_processor.process_single_order(order_id)
         if status[1] == "Order placed successfully!":
-            order_processor.delete_file(order_id)
+            # order_processor.delete_file(order_id)
             status = status[1]
         elif status[0] == 'order_failed':
                 status = "Order has been failed. Check the logs!"

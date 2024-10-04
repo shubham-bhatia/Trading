@@ -53,9 +53,9 @@ def process_single_order(filename):
                     float(order_data["sl"]),
                     float(order_data["tp"])
                 )
-
-                logging.info(f"Shubham: {response}")
-                logging.info(f"response_s: {response[1]}")
+                
+                # logging.info(f"Shubham: {response}")
+                # logging.info(f"response_s: {response[1]}")
 
                 if response[1] == 'error': #response['s']
                     logging.info(f"Order failed: {response}")
